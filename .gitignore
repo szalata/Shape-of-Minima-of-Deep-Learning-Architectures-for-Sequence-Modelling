@@ -6,6 +6,12 @@ __pycache__/
 # C extensions
 *.so
 
+
+FibonacciDataset.py
+model.pt
+FibData/
+MemData/
+
 # Distribution / packaging
 .Python
 build/
