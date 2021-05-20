@@ -16,7 +16,6 @@ class SeqDataset(Dataset):
         return len(self.seq)
 
     def __getitem__(self, idx):
-        # convert to tensor
         seq = self.seq[idx]
         target = self.targets[idx]
 
