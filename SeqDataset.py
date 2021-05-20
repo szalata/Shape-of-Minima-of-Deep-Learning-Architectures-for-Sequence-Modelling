@@ -1,31 +1,23 @@
+import os
+
 import torch
 from torch.utils.data import Dataset
 import numpy as np
 
+
 class SeqDataset(Dataset):
     """Sequence learning dataset."""
 
-    def __init__(self, Xs, Ys):
-        """
-        Args:
-            Xs (string): Path to the npy file with features
-            Ys (string): Path to the npy file with targets
-        """
-        self.featurs = np.load(Xs)
-        self.targets = np.load(Ys) 
+    def __init__(self, directory, split):
+        self.seq = torch.from_numpy(np.load(os.path.join(directory, f"X_{split}.npy")))
+        self.targets = torch.from_numpy(np.load(os.path.join(directory, f"y_{split}.npy")))
 
     def __len__(self):
-        return len(self.featurs)
+        return len(self.seq)
 
     def __getitem__(self, idx):
-        #convert to tensor
-        feature = torch.from_numpy(self.featurs[idx])
-        target = torch.Tensor([self.targets[idx]])
+        # convert to tensor
+        seq = self.seq[idx]
+        target = self.targets[idx]
 
-        return feature,target
-
-    def len_unique(self):
-        
-        return len(np.unique(self.featurs))
-
-
+        return seq, target
