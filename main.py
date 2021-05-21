@@ -3,6 +3,7 @@ import argparse
 import torch
 import numpy as np
 import torch.nn as nn
+from torch.nn.utils import clip_grad_value_
 from torch.optim import AdamW
 from torch.utils.data import DataLoader
 from tqdm import tqdm, trange
@@ -15,13 +16,15 @@ parser.add_argument('--model', type=str, default='LSTM',
                     help='type of recurrent net (RNN_TANH, RNN_RELU, LSTM, GRU, Transformer)')
 parser.add_argument('--emsize', type=int, default=1,
                     help='size of word embeddings')
-parser.add_argument('--nhid', type=int, default=32,
+parser.add_argument('--nhid', type=int, default=64,
                     help='number of hidden units per layer')
-parser.add_argument('--nlayers', type=int, default=4,
+parser.add_argument('--nlayers', type=int, default=8,
                     help='number of layers')
 parser.add_argument('--lr', type=float, default=0.2,
                     help='initial learning rate')
-parser.add_argument('--epochs', type=int, default=10,
+parser.add_argument('--clip', type=float, default=0.25,
+                    help='gradient clipping')
+parser.add_argument('--epochs', type=int, default=100,
                     help='upper epoch limit')
 parser.add_argument('--batch_size', type=int, default=5, metavar='N',
                     help='batch size')
@@ -119,6 +122,7 @@ def train():
                 output = model(data, hidden)
             loss = criterion(output, targets)
             loss.backward()
+            clip_grad_value_(model.parameters(), args.clip)
 
             optimizer.step()
 

@@ -13,7 +13,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--seq_len', type=int, default=5, help='length of the sequence/sample')
     parser.add_argument('--samples', type=int, default=10000, help='the number of samples to return')
-    parser.add_argument('--increment', type=int, default=1,
+    parser.add_argument('--increment', type=int, default=1000,
                         help='the difference between consecutive numbers')
     parser.add_argument('--max_starting_point', type=int, default=1000)
     parser.add_argument('--seed', type=int, default=42)
