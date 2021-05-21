@@ -26,9 +26,9 @@ class RNNModel(nn.Module):
         self.nout = nout
 
     def forward(self, input, hidden):
-        emb = self.drop(input)
+        emb = input
         output, hidden = self.rnn(emb, hidden)
-        output = self.drop(output)
+        output = self.drop(output[:, -1])
         decoded = self.decoder(output)
         return decoded
 
