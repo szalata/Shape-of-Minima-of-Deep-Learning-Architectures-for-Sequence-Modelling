@@ -42,6 +42,8 @@ parser.add_argument('--log-interval', type=int, default=1600, metavar='N',
                     help='report interval')
 parser.add_argument('--save', type=str, default='model.pt',
                     help='path to save the final model')
+parser.add_argument('--model_path', type=str, default=None,
+                    help='path to load the model')
 parser.add_argument('--data_dir', type=str, default='data/sequence_learning',
                     help='directory with the dataset')
 parser.add_argument('--nhead', type=int, default=2,
@@ -78,6 +80,9 @@ else:
     model = model.RNNModel(args.model, args.emsize, args.nout, args.nhid, args.nlayers,
                            args.dropout).to(device)
 
+if args.model_path is not None:
+    model.load_state_dict(torch.load(args.model_path))
+    
 criterion = nn.MSELoss()
 
 
