@@ -81,8 +81,8 @@ else:
                            args.dropout).to(device)
 
 if args.model_path is not None:
-    model.load_state_dict(torch.load(args.model_path))
-    
+    model = torch.load(args.model_path)
+
 criterion = nn.MSELoss()
 
 
