@@ -6,7 +6,7 @@ import torch.nn as nn
 class RNNModel(nn.Module):
     """Container module with an encoder, a recurrent module, and a decoder."""
 
-    def __init__(self, rnn_type, ninp, nout, nhid, nlayers, dropout=0.1):
+    def __init__(self, rnn_type, ninp, nout, nhid, nlayers, task, dropout=0.1):
         super(RNNModel, self).__init__()
         self.drop = nn.Dropout(dropout)
         if rnn_type in ['LSTM', 'GRU']:
@@ -24,12 +24,16 @@ class RNNModel(nn.Module):
         self.nhid = nhid
         self.nlayers = nlayers
         self.nout = nout
+        self.sigmoid = torch.nn.Sigmoid()
+        self.task = task
 
     def forward(self, input, hidden):
         emb = input
         output, hidden = self.rnn(emb, hidden)
         output = self.drop(output[:, -1])
         decoded = self.decoder(output)
+        if self.task == "sequence_classification":
+            decoded = self.sigmoid(decoded)
         return decoded
 
     def init_hidden(self, bsz):
@@ -89,7 +93,7 @@ class PositionalEncoding(nn.Module):
 class TransformerModel(nn.Module):
     """Container module with an encoder, a recurrent or transformer module, and a decoder."""
 
-    def __init__(self, ninp, nout, nhead, nhid, nlayers, dropout=0.5):
+    def __init__(self, ninp, nout, nhead, nhid, nlayers, task, dropout=0.5):
         super(TransformerModel, self).__init__()
         try:
             from torch.nn import TransformerEncoder, TransformerEncoderLayer
