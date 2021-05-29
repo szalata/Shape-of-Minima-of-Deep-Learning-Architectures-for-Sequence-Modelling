@@ -8,29 +8,23 @@ from sklearn.model_selection import train_test_split
 
 if __name__ == '__main__':
     """
-    A every next number in a sequence is an increment of the previous one
+    Predict whether the sum of the sequence exceeds the threshold
     """
     parser = argparse.ArgumentParser()
     parser.add_argument('--seq_len', type=int, default=5, help='length of the sequence/sample')
-    parser.add_argument('--samples', type=int, default=1000, help='the number of samples to return')
-    parser.add_argument('--increment', type=int, default=1,
-                        help='the difference between consecutive numbers')
-    parser.add_argument('--max_starting_point', type=int, default=1000)
+    parser.add_argument('--samples', type=int, default=5000, help='the number of samples to return')
+    parser.add_argument('--threshold', type=int, default=0)
+    parser.add_argument('--max_number', type=int, default=1000)
     parser.add_argument('--seed', type=int, default=42)
     parser.add_argument('--test_fraction', type=float, default=0.1)
     parser.add_argument('--output_dir', type=str, help='name of the file to write')
     args = parser.parse_args()
     np.random.seed(args.seed)
 
-    out_array = np.zeros((args.samples, args.seq_len))
-    out_array[:, 0] = np.random.randint(
-        -args.max_starting_point, high=args.max_starting_point, size=args.samples)
-    for i in range(1, args.seq_len):
-        out_array[:, i] = out_array[:, i - 1] + args.increment
-    targets_array = out_array[:, -1] + args.increment
+    out_array = np.random.uniform(
+        -args.max_number, high=args.max_number, size=(args.samples, args.seq_len))
+    targets_array = out_array.sum(axis=1) >= args.threshold
 
-    print(out_array)
-    
     # create data splits
     X_train, X_test, y_train, y_test = train_test_split(out_array, targets_array,
                                                         test_size=args.test_fraction,

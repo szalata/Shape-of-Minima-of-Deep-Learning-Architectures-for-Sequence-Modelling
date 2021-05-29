@@ -1,7 +1,49 @@
 import math
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
+
+
+class RNNModel(nn.Module):
+    """Container module with an encoder, a recurrent module, and a decoder."""
+
+    def __init__(self, rnn_type, ninp, nout, nhid, nlayers, task, dropout=0.1):
+        super(RNNModel, self).__init__()
+        self.drop = nn.Dropout(dropout)
+        if rnn_type in ['LSTM', 'GRU']:
+            self.rnn = getattr(nn, rnn_type)(ninp, nhid, nlayers, dropout=dropout, batch_first=True)
+        else:
+            try:
+                nonlinearity = {'RNN_TANH': 'tanh', 'RNN_RELU': 'relu'}[rnn_type]
+            except KeyError:
+                raise ValueError("""An invalid option for `--model` was supplied,
+                                 options are ['LSTM', 'GRU', 'RNN_TANH' or 'RNN_RELU']""")
+            self.rnn = nn.RNN(ninp, nhid, nlayers, nonlinearity=nonlinearity, dropout=dropout, batch_first=True)
+        self.decoder = nn.Linear(nhid, nout)
+
+        self.rnn_type = rnn_type
+        self.nhid = nhid
+        self.nlayers = nlayers
+        self.nout = nout
+        self.sigmoid = torch.nn.Sigmoid()
+        self.task = task
+
+    def forward(self, input, hidden):
+        emb = input
+        output, hidden = self.rnn(emb, hidden)
+        output = self.drop(output[:, -1])
+        decoded = self.decoder(output)
+        if self.task == "sequence_classification":
+            decoded = self.sigmoid(decoded)
+        return decoded
+
+    def init_hidden(self, bsz):
+        weight = next(self.parameters())
+        if self.rnn_type == 'LSTM':
+            return (weight.new_zeros(self.nlayers, bsz, self.nhid),
+                    weight.new_zeros(self.nlayers, bsz, self.nhid))
+        else:
+            return weight.new_zeros(self.nlayers, bsz, self.nhid)
+
 
 class PositionalEncoding(nn.Module):
     r"""Inject some information about the relative or absolute position of the tokens
@@ -42,14 +84,15 @@ class PositionalEncoding(nn.Module):
         Examples:
             >>> output = pos_encoder(x)
         """
-
+        
         x = x + self.pe[:x.size(0), :]
+        
         return self.dropout(x)
 
 class TransformerModel(nn.Module):
     """Container module with an encoder, a recurrent or transformer module, and a decoder."""
 
-    def __init__(self, ninp, nhead, nhid, nlayers, dropout=0.5):
+    def __init__(self, ninp, nhead, nhid, nlayers, task, dropout=0.5):
         super(TransformerModel, self).__init__()
         try:
             from torch.nn import TransformerEncoder, TransformerEncoderLayer
@@ -62,6 +105,8 @@ class TransformerModel(nn.Module):
         self.transformer_encoder = TransformerEncoder(encoder_layers, nlayers)
         self.ninp = ninp
         self.decoder = nn.Linear(ninp, 1)
+        self.task = task
+        self.sigmoid = nn.Sigmoid()
         
 
     def _generate_square_subsequent_mask(self, sz):
@@ -79,9 +124,12 @@ class TransformerModel(nn.Module):
         else:
             self.src_mask = None
        
-        
+       
         src = self.pos_encoder(src)
+       
         output = self.transformer_encoder(src, self.src_mask)
         output = self.decoder(output)
+        if self.task == "sequence_classification":
+            output = self.sigmoid(output)
         return output
         
