@@ -132,5 +132,5 @@ class TransformerModel(nn.Module):
         output = self.transformer_encoder(src, self.src_mask)
         output = self.decoder(output)
         if self.task == "sequence_classification":
-            output = self.sigmoid(output[:, -1])
+            output = self.sigmoid(torch.mean(output, dim=1))
         return output

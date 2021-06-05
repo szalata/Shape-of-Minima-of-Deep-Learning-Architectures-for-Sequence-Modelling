@@ -20,7 +20,7 @@ parser.add_argument('--nhid', type=int, default=8,
                     help='number of hidden units per layer')
 parser.add_argument('--nlayers', type=int, default=1,
                     help='number of layers')
-parser.add_argument('--lr', type=float, default=0.2,
+parser.add_argument('--lr', type=float, default=0.001,
                     help='initial learning rate')
 parser.add_argument('--clip', type=float, default=0.25,
                     help='gradient clipping')
@@ -132,7 +132,7 @@ def train():
     best_val_loss = None
 
     train_iterator = trange(int(args.epochs), desc="Epoch")
-    optimizer = AdamW(model.parameters())#, lr=args.learning_rate, eps=args.adam_epsilon)
+    optimizer = AdamW(model.parameters(), lr=args.lr)
     for _ in train_iterator:
         epoch_iterator = tqdm(dataloader_train)
         for step, batch in enumerate(epoch_iterator):
