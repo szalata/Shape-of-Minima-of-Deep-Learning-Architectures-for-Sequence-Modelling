@@ -14,8 +14,8 @@ from SeqDataset import SeqDataset
 parser = argparse.ArgumentParser(description='PyTorch Transformer')
 parser.add_argument('--model', type=str, default='Transformer',
                     help='type of recurrent net (RNN_TANH, RNN_RELU, LSTM, GRU, Transformer)')
-parser.add_argument('--emsize', type=int, default=4,
-                    help='size of word embeddings')
+parser.add_argument('--emsize', type=int, default=1,
+                    help='size of input embeddings')
 parser.add_argument('--nhid', type=int, default=8,
                     help='number of hidden units per layer')
 parser.add_argument('--nlayers', type=int, default=1,
@@ -28,8 +28,6 @@ parser.add_argument('--epochs', type=int, default=10,
                     help='upper epoch limit')
 parser.add_argument('--batch_size', type=int, default=5, metavar='N',
                     help='batch size')
-parser.add_argument('--bptt', type=int, default=5,
-                    help='sequence length')
 parser.add_argument('--nout', type=int, default=1,
                     help='number of outputs')
 parser.add_argument('--dropout', type=float, default=0.1,
@@ -48,7 +46,7 @@ parser.add_argument('--task', type=str, default=None,
                     help='the task to execute')
 parser.add_argument('--data_dir', type=str, default='data/sequence_learning',
                     help='directory with the dataset')
-parser.add_argument('--nhead', type=int, default=2,
+parser.add_argument('--nhead', type=int, default=1,
                     help='the number of heads in the encoder/decoder of the transformer model')
 parser.add_argument('--dry-run', action='store_true',
                     help='verify the code and the model')

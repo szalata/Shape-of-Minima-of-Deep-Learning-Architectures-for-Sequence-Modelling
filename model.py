@@ -93,7 +93,7 @@ class PositionalEncoding(nn.Module):
 class TransformerModel(nn.Module):
     """Container module with an encoder, a recurrent or transformer module, and a decoder."""
 
-    def __init__(self, ninp, nhead, nhid, nlayers, task, dropout=0.5):
+    def __init__(self, ninp, nhead, nhid, nlayers, task, dropout=0.1):
         super(TransformerModel, self).__init__()
         try:
             from torch.nn import TransformerEncoder, TransformerEncoderLayer
@@ -101,11 +101,12 @@ class TransformerModel(nn.Module):
             raise ImportError('TransformerEncoder module does not exist in PyTorch 1.1 or lower.')
         self.model_type = 'Transformer'
         self.src_mask = None
-        self.pos_encoder = PositionalEncoding(ninp, dropout)
-        encoder_layers = TransformerEncoderLayer(ninp, nhead, nhid, dropout)
+        self.embed = nn.Linear(ninp, nhid)
+        self.pos_encoder = PositionalEncoding(nhid, dropout)
+        encoder_layers = TransformerEncoderLayer(nhid, nhead, nhid * 2, dropout)
         self.transformer_encoder = TransformerEncoder(encoder_layers, nlayers)
         self.ninp = ninp
-        self.decoder = nn.Linear(ninp, 1)
+        self.decoder = nn.Linear(nhid, 1)
         self.task = task
         self.sigmoid = nn.Sigmoid()
 
@@ -126,7 +127,7 @@ class TransformerModel(nn.Module):
             self.src_mask = None
 
 
-        src = self.pos_encoder(src)
+        src = self.pos_encoder(self.embed(src))
 
         output = self.transformer_encoder(src, self.src_mask)
         output = self.decoder(output)
