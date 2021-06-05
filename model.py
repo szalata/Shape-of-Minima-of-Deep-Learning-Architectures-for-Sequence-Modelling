@@ -45,7 +45,6 @@ class RNNModel(nn.Module):
             return weight.new_zeros(self.nlayers, bsz, self.nhid)
 
 
-# Temporarily leave PositionalEncoding module here. Will be moved somewhere else.
 class PositionalEncoding(nn.Module):
     r"""Inject some information about the relative or absolute position of the tokens
         in the sequence. The positional encodings have the same dimension as
@@ -87,13 +86,14 @@ class PositionalEncoding(nn.Module):
         """
 
         x = x + self.pe[:x.size(0), :]
+
         return self.dropout(x)
 
 
 class TransformerModel(nn.Module):
     """Container module with an encoder, a recurrent or transformer module, and a decoder."""
 
-    def __init__(self, ninp, nout, nhead, nhid, nlayers, task, dropout=0.5):
+    def __init__(self, ninp, nhead, nhid, nlayers, task, dropout=0.5):
         super(TransformerModel, self).__init__()
         try:
             from torch.nn import TransformerEncoder, TransformerEncoderLayer
@@ -105,14 +105,18 @@ class TransformerModel(nn.Module):
         encoder_layers = TransformerEncoderLayer(ninp, nhead, nhid, dropout)
         self.transformer_encoder = TransformerEncoder(encoder_layers, nlayers)
         self.ninp = ninp
-        self.decoder = nn.Linear(ninp, nout)
+        self.decoder = nn.Linear(ninp, 1)
+        self.task = task
+        self.sigmoid = nn.Sigmoid()
+
 
     def _generate_square_subsequent_mask(self, sz):
         mask = (torch.triu(torch.ones(sz, sz)) == 1).transpose(0, 1)
         mask = mask.float().masked_fill(mask == 0, float('-inf')).masked_fill(mask == 1, float(0.0))
         return mask
 
-    def forward(self, src, has_mask=True):
+
+    def forward(self, src, has_mask=False):
         if has_mask:
             device = src.device
             if self.src_mask is None or self.src_mask.size(0) != len(src):
@@ -121,8 +125,11 @@ class TransformerModel(nn.Module):
         else:
             self.src_mask = None
 
-        src = src * math.sqrt(self.ninp)
+
         src = self.pos_encoder(src)
+
         output = self.transformer_encoder(src, self.src_mask)
         output = self.decoder(output)
+        if self.task == "sequence_classification":
+            output = self.sigmoid(output[:, -1])
         return output

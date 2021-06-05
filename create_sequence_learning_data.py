@@ -29,6 +29,8 @@ if __name__ == '__main__':
         out_array[:, i] = out_array[:, i - 1] + args.increment
     targets_array = out_array[:, -1] + args.increment
 
+    print(out_array)
+    
     # create data splits
     X_train, X_test, y_train, y_test = train_test_split(out_array, targets_array,
                                                         test_size=args.test_fraction,

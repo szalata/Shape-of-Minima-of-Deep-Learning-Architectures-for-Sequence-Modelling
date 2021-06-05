@@ -12,9 +12,9 @@ import model
 from SeqDataset import SeqDataset
 
 parser = argparse.ArgumentParser(description='PyTorch Transformer')
-parser.add_argument('--model', type=str, default='LSTM',
+parser.add_argument('--model', type=str, default='Transformer',
                     help='type of recurrent net (RNN_TANH, RNN_RELU, LSTM, GRU, Transformer)')
-parser.add_argument('--emsize', type=int, default=1,
+parser.add_argument('--emsize', type=int, default=4,
                     help='size of word embeddings')
 parser.add_argument('--nhid', type=int, default=8,
                     help='number of hidden units per layer')
@@ -40,7 +40,7 @@ parser.add_argument('--cuda', action='store_true',
                     help='use CUDA')
 parser.add_argument('--log-interval', type=int, default=1600, metavar='N',
                     help='report interval')
-parser.add_argument('--save', type=str, default='model.pt',
+parser.add_argument('--save', type=str, default='trained_models/model.pt',
                     help='path to save the final model')
 parser.add_argument('--model_path', type=str, default=None,
                     help='path to load the model')
@@ -79,8 +79,7 @@ dataloader_val = DataLoader(dataset_val,
                             batch_size=args.batch_size)
 
 if args.model == 'Transformer':
-    model = model.TransformerModel(args.emsize, args.nout, args.nhead, args.nhid, args.nlayers,
-                                   args.task, args.dropout).to(device)
+    model = model.TransformerModel(args.emsize, args.nhead, args.nhid, args.nlayers, args.task, args.dropout).to(device)
 else:
     model = model.RNNModel(args.model, args.emsize, args.nout, args.nhid, args.nlayers, args.task,
                            args.dropout).to(device)
@@ -110,6 +109,7 @@ def evaluate(dataloader):
             total_samples += targets.shape[0]
             if args.model == 'Transformer':
                 output = model(data)
+                targets = targets
             else:
                 output = model(data, hidden)
             if args.task == "sequence_classification":
@@ -141,7 +141,8 @@ def train():
             data, targets = batch
             model.zero_grad()
             if args.model == 'Transformer':
-                output = model(data).squeeze()
+                output = model(data)
+                targets = targets
             else:
                 output = model(data, hidden)
             loss = criterion(output, targets)
