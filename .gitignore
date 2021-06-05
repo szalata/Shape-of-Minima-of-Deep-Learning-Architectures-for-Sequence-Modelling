@@ -7,10 +7,9 @@ __pycache__/
 *.so
 
 
-FibonacciDataset.py
-model.pt
-FibData/
-MemData/
+
+*.pt
+data/
 
 # Distribution / packaging
 .Python
@@ -133,3 +132,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+.idea
+data
+trained_models
