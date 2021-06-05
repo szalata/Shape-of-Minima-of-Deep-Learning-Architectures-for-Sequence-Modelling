@@ -106,7 +106,7 @@ def evaluate(dataloader):
         for data, targets in tqdm(dataloader, desc="Evaluating"):
             total_samples += targets.shape[0]
             if args.model == 'Transformer':
-                output = model(data)
+                output = model(data, has_mask=True)
                 targets = targets
             else:
                 output = model(data, hidden)
@@ -139,7 +139,7 @@ def train():
             data, targets = batch
             model.zero_grad()
             if args.model == 'Transformer':
-                output = model(data)
+                output = model(data, has_mask=True)
                 targets = targets
             else:
                 output = model(data, hidden)
