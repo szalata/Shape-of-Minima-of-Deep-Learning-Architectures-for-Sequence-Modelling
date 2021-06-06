@@ -31,11 +31,13 @@ class RNNModel(nn.Module):
     def forward(self, input, hidden):
         emb = input
         output, hidden = self.rnn(emb, hidden)
-        output = output[:, -1]
-        decoded = self.decoder(output)
         if self.task == "sequence_classification":
-            decoded = self.sigmoid(decoded)
-        return decoded
+            return self.sigmoid(self.decoder(output[:, -1]))
+        elif self.task == "sequence_learning":
+            return self.decoder(output[:, -1])
+        else:
+            print("unknown task!")
+            exit()
 
     def init_hidden(self, bsz):
         weight = next(self.parameters())
@@ -125,8 +127,12 @@ class TransformerModel(nn.Module):
         output = self.transformer_encoder(src)
         output = self.decoder(output)
         if self.task == "sequence_classification":
-            output = self.sigmoid(torch.mean(output, dim=0))
-        return output
+            return self.sigmoid(torch.mean(output, dim=0))
+        elif self.task == "sequence_learning":
+            return output[0]
+        else:
+            print("unknown task!")
+            exit()
 
     def _reset_parameters(self):
         r"""Initiate parameters in the transformer model."""

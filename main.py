@@ -42,8 +42,6 @@ parser.add_argument('--save', type=str, default='trained_models/model.pt',
                     help='path to save the final model')
 parser.add_argument('--model_path', type=str, default=None,
                     help='path to load the model')
-parser.add_argument('--task', type=str, default=None,
-                    help='the task to execute')
 parser.add_argument('--data_dir', type=str, default="data/sequence_classification",
                     help='directory with the dataset')
 parser.add_argument('--nhead', type=int, default=1,
@@ -54,8 +52,7 @@ parser.add_argument('--seq_len', type=int, default=5, help='length of the sequen
 
 args = parser.parse_args()
 
-if args.task is None:
-    args.task = args.data_dir.split("/")[1]
+args.task = args.data_dir.split("/")[1]
 
 # Set the random seed manually for reproducibility.
 torch.manual_seed(args.seed)
