@@ -12,13 +12,13 @@ if __name__ == '__main__':
     """
     parser = argparse.ArgumentParser()
     parser.add_argument('--seq_len', type=int, default=5, help='length of the sequence/sample')
-    parser.add_argument('--samples', type=int, default=10000, help='the number of samples to return')
+    parser.add_argument('--samples', type=int, default=5000, help='the number of samples to return')
     parser.add_argument('--increment', type=int, default=1000,
                         help='the difference between consecutive numbers')
     parser.add_argument('--max_starting_point', type=int, default=1000)
     parser.add_argument('--seed', type=int, default=42)
     parser.add_argument('--test_fraction', type=float, default=0.1)
-    parser.add_argument('--output_dir', type=str, help='name of the file to write')
+    parser.add_argument('--output_dir', type=str, help='name of the file to write', default="data/sequence_learning")
     args = parser.parse_args()
     np.random.seed(args.seed)
 
@@ -29,8 +29,6 @@ if __name__ == '__main__':
         out_array[:, i] = out_array[:, i - 1] + args.increment
     targets_array = out_array[:, -1] + args.increment
 
-    print(out_array)
-    
     # create data splits
     X_train, X_test, y_train, y_test = train_test_split(out_array, targets_array,
                                                         test_size=args.test_fraction,
