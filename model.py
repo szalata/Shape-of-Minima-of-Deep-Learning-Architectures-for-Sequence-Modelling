@@ -1,6 +1,7 @@
 import math
 import torch
 import torch.nn as nn
+from torch.nn.init import xavier_uniform_
 
 
 class RNNModel(nn.Module):
@@ -104,11 +105,13 @@ class TransformerModel(nn.Module):
         self.embed = nn.Linear(ninp, nhid)
         self.pos_encoder = PositionalEncoding(nhid, dropout)
         encoder_layers = TransformerEncoderLayer(nhid, nhead, nhid * 2, dropout)
-        self.transformer_encoder = TransformerEncoder(encoder_layers, nlayers)
+        encoder_norm = nn.LayerNorm(nhid)
+        self.transformer_encoder = TransformerEncoder(encoder_layers, nlayers, encoder_norm)
         self.ninp = ninp
         self.decoder = nn.Linear(nhid, 1)
         self.task = task
         self.sigmoid = nn.Sigmoid()
+        self._reset_parameters()
 
 
     def _generate_square_subsequent_mask(self, sz):
@@ -126,11 +129,17 @@ class TransformerModel(nn.Module):
         else:
             self.src_mask = None
 
-
-        src = self.pos_encoder(self.embed(src))
+        src = self.embed(src)
+        src = self.pos_encoder(torch.transpose(src, 0, 1))
 
         output = self.transformer_encoder(src, self.src_mask)
         output = self.decoder(output)
         if self.task == "sequence_classification":
-            output = self.sigmoid(torch.mean(output, dim=1))
+            output = self.sigmoid(output[0])
         return output
+
+    def _reset_parameters(self):
+        r"""Initiate parameters in the transformer model."""
+        for p in self.parameters():
+            if p.dim() > 1:
+                xavier_uniform_(p)

@@ -17,7 +17,8 @@ if __name__ == '__main__':
     parser.add_argument('--max_number', type=int, default=1000)
     parser.add_argument('--seed', type=int, default=42)
     parser.add_argument('--test_fraction', type=float, default=0.1)
-    parser.add_argument('--output_dir', type=str, help='name of the file to write')
+    parser.add_argument('--output_dir', type=str, help='name of the file to write',
+                        default="data/sequence_classification")
     args = parser.parse_args()
     np.random.seed(args.seed)
 

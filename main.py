@@ -26,7 +26,7 @@ parser.add_argument('--clip', type=float, default=0.25,
                     help='gradient clipping')
 parser.add_argument('--epochs', type=int, default=10,
                     help='upper epoch limit')
-parser.add_argument('--batch_size', type=int, default=5, metavar='N',
+parser.add_argument('--batch_size', type=int, default=10, metavar='N',
                     help='batch size')
 parser.add_argument('--nout', type=int, default=1,
                     help='number of outputs')
@@ -44,7 +44,7 @@ parser.add_argument('--model_path', type=str, default=None,
                     help='path to load the model')
 parser.add_argument('--task', type=str, default=None,
                     help='the task to execute')
-parser.add_argument('--data_dir', type=str, default='data/sequence_learning',
+parser.add_argument('--data_dir', type=str, default="data/sequence_classification",
                     help='directory with the dataset')
 parser.add_argument('--nhead', type=int, default=1,
                     help='the number of heads in the encoder/decoder of the transformer model')
@@ -106,7 +106,7 @@ def evaluate(dataloader):
         for data, targets in tqdm(dataloader, desc="Evaluating"):
             total_samples += targets.shape[0]
             if args.model == 'Transformer':
-                output = model(data, has_mask=True)
+                output = model(data)
                 targets = targets
             else:
                 output = model(data, hidden)
@@ -139,7 +139,7 @@ def train():
             data, targets = batch
             model.zero_grad()
             if args.model == 'Transformer':
-                output = model(data, has_mask=True)
+                output = model(data)
                 targets = targets
             else:
                 output = model(data, hidden)
