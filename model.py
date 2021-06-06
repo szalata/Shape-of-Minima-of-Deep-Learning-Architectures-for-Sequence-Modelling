@@ -17,7 +17,8 @@ class RNNModel(nn.Module):
             except KeyError:
                 raise ValueError("""An invalid option for `--model` was supplied,
                                  options are ['LSTM', 'GRU', 'RNN_TANH' or 'RNN_RELU']""")
-            self.rnn = nn.RNN(ninp, nhid, nlayers, nonlinearity=nonlinearity, dropout=dropout, batch_first=True)
+            self.rnn = nn.RNN(ninp, nhid, nlayers, nonlinearity=nonlinearity, dropout=dropout,
+                              batch_first=True)
         self.decoder = nn.Linear(nhid, nout)
 
         self.rnn_type = rnn_type
@@ -112,12 +113,10 @@ class TransformerModel(nn.Module):
         self.sigmoid = nn.Sigmoid()
         self._reset_parameters()
 
-
     def _generate_square_subsequent_mask(self, sz):
         mask = (torch.triu(torch.ones(sz, sz)) == 1).transpose(0, 1)
         mask = mask.float().masked_fill(mask == 0, float('-inf')).masked_fill(mask == 1, float(0.0))
         return mask
-
 
     def forward(self, src):
         src = self.embed(src)
