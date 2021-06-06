@@ -50,6 +50,7 @@ parser.add_argument('--nhead', type=int, default=1,
                     help='the number of heads in the encoder/decoder of the transformer model')
 parser.add_argument('--dry-run', action='store_true',
                     help='verify the code and the model')
+parser.add_argument('--seq_len', type=int, default=5, help='length of the sequence/sample')
 
 args = parser.parse_args()
 
@@ -77,7 +78,8 @@ dataloader_val = DataLoader(dataset_val,
                             batch_size=args.batch_size)
 
 if args.model == 'Transformer':
-    model = model.TransformerModel(args.emsize, args.nhead, args.nhid, args.nlayers, args.task, args.dropout).to(device)
+    model = model.TransformerModel(args.emsize, args.nhead, args.nhid, args.nlayers, args.task,
+                                   args.dropout, args.seq_len).to(device)
 else:
     model = model.RNNModel(args.model, args.emsize, args.nout, args.nhid, args.nlayers, args.task,
                            args.dropout).to(device)

@@ -9,7 +9,6 @@ class RNNModel(nn.Module):
 
     def __init__(self, rnn_type, ninp, nout, nhid, nlayers, task, dropout=0.1):
         super(RNNModel, self).__init__()
-        self.drop = nn.Dropout(dropout)
         if rnn_type in ['LSTM', 'GRU']:
             self.rnn = getattr(nn, rnn_type)(ninp, nhid, nlayers, dropout=dropout, batch_first=True)
         else:
@@ -31,7 +30,7 @@ class RNNModel(nn.Module):
     def forward(self, input, hidden):
         emb = input
         output, hidden = self.rnn(emb, hidden)
-        output = self.drop(output[:, -1])
+        output = output[:, -1]
         decoded = self.decoder(output)
         if self.task == "sequence_classification":
             decoded = self.sigmoid(decoded)
@@ -94,7 +93,7 @@ class PositionalEncoding(nn.Module):
 class TransformerModel(nn.Module):
     """Container module with an encoder, a recurrent or transformer module, and a decoder."""
 
-    def __init__(self, ninp, nhead, nhid, nlayers, task, dropout=0.1):
+    def __init__(self, ninp, nhead, nhid, nlayers, task, dropout=0.1, max_len=5):
         super(TransformerModel, self).__init__()
         try:
             from torch.nn import TransformerEncoder, TransformerEncoderLayer
@@ -103,7 +102,7 @@ class TransformerModel(nn.Module):
         self.model_type = 'Transformer'
         self.src_mask = None
         self.embed = nn.Linear(ninp, nhid)
-        self.pos_encoder = PositionalEncoding(nhid, dropout)
+        self.pos_encoder = PositionalEncoding(nhid, dropout, max_len)
         encoder_layers = TransformerEncoderLayer(nhid, nhead, nhid * 2, dropout)
         encoder_norm = nn.LayerNorm(nhid)
         self.transformer_encoder = TransformerEncoder(encoder_layers, nlayers, encoder_norm)
@@ -120,19 +119,11 @@ class TransformerModel(nn.Module):
         return mask
 
 
-    def forward(self, src, has_mask=False):
-        if has_mask:
-            device = src.device
-            if self.src_mask is None or self.src_mask.size(0) != len(src):
-                mask = self._generate_square_subsequent_mask(len(src)).to(device)
-                self.src_mask = mask
-        else:
-            self.src_mask = None
-
+    def forward(self, src):
         src = self.embed(src)
         src = self.pos_encoder(torch.transpose(src, 0, 1))
 
-        output = self.transformer_encoder(src, self.src_mask)
+        output = self.transformer_encoder(src)
         output = self.decoder(output)
         if self.task == "sequence_classification":
             output = self.sigmoid(output[0])
