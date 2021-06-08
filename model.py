@@ -126,9 +126,7 @@ class TransformerModel(nn.Module):
 
     def create_padding_mask(self, seq):
         r"""Create key_padding_mask to deal with variable sequence length"""
-        
         seq = (seq==0).float()
-        seq = seq.masked_fill(seq == 1, float('-inf'))
         return seq.squeeze().bool()
 
     def forward(self, src, has_mask=True):
@@ -138,7 +136,6 @@ class TransformerModel(nn.Module):
         
         src = self.embed(src)
         src = self.pos_encoder(torch.transpose(src, 0, 1))
-        
         
         output = self.transformer_encoder(src, src_key_padding_mask=self.src_mask)
         
