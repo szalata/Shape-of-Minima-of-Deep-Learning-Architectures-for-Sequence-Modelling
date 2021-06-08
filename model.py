@@ -2,6 +2,7 @@ import math
 import torch
 import torch.nn as nn
 from torch.nn.init import xavier_uniform_
+import numpy as np
 
 
 class RNNModel(nn.Module):
@@ -116,15 +117,31 @@ class TransformerModel(nn.Module):
         self._reset_parameters()
 
     def _generate_square_subsequent_mask(self, sz):
+        print(torch.triu(torch.ones(sz, sz)))
+        print((torch.triu(torch.ones(sz, sz)) == 1).transpose(0, 1))
         mask = (torch.triu(torch.ones(sz, sz)) == 1).transpose(0, 1)
         mask = mask.float().masked_fill(mask == 0, float('-inf')).masked_fill(mask == 1, float(0.0))
         return mask
 
-    def forward(self, src):
+
+    def create_padding_mask(self, seq):
+        r"""Create key_padding_mask to deal with variable sequence length"""
+        
+        seq = (seq==0).float()
+        seq = seq.masked_fill(seq == 1, float('-inf'))
+        return seq.squeeze().bool()
+
+    def forward(self, src, has_mask=True):
+        self.src_mask = None
+        if has_mask:
+            self.src_mask = self.create_padding_mask(src)
+        
         src = self.embed(src)
         src = self.pos_encoder(torch.transpose(src, 0, 1))
-
-        output = self.transformer_encoder(src)
+        
+        
+        output = self.transformer_encoder(src, src_key_padding_mask=self.src_mask)
+        
         output = self.decoder(output)
         if self.task == "sequence_classification":
             return self.sigmoid(torch.mean(output, dim=0))

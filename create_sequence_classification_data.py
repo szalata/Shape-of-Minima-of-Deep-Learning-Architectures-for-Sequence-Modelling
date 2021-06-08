@@ -19,12 +19,32 @@ if __name__ == '__main__':
     parser.add_argument('--test_fraction', type=float, default=0.1)
     parser.add_argument('--output_dir', type=str, help='name of the file to write',
                         default="data/sequence_classification")
+    parser.add_argument('--variable_length', action='store_true', help='if set, the sequences will have different length')
+    parser.add_argument('--max_len', type=int, default=20, help='maximum length for varaibel length sequences')
+
     args = parser.parse_args()
     np.random.seed(args.seed)
 
-    out_array = np.random.uniform(
-        -args.max_number, high=args.max_number, size=(args.samples, args.seq_len))
-    targets_array = out_array.sum(axis=1) >= args.threshold
+
+    if args.variable_length:
+        out_array = np.zeros((args.samples, args.max_len))
+        targets_array = np.zeros(args.samples)
+        for i in range(args.samples):
+            
+            seq = np.random.uniform(
+                -args.max_number, high=args.max_number, size=(args.max_len-i%args.max_len))
+            target = seq.sum(axis=0) >= args.threshold
+            seq = np.pad(seq, (0,args.max_len-len(seq)), 'constant', constant_values=0)
+            out_array[i]=seq
+            targets_array[i]=target
+    
+    
+
+    else:
+        out_array = np.random.uniform(
+            -args.max_number, high=args.max_number, size=(args.samples, args.seq_len))
+        targets_array = out_array.sum(axis=1) >= args.threshold
+
 
     # create data splits
     X_train, X_test, y_train, y_test = train_test_split(out_array, targets_array,

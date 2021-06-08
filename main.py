@@ -36,7 +36,7 @@ parser.add_argument('--seed', type=int, default=1111,
                     help='random seed')
 parser.add_argument('--cuda', action='store_true',
                     help='use CUDA')
-parser.add_argument('--log-interval', type=int, default=1600, metavar='N',
+parser.add_argument('--log-interval', type=int, default=160, metavar='N',
                     help='report interval')
 parser.add_argument('--save', type=str, default='trained_models/model.pt',
                     help='path to save the final model')
@@ -140,6 +140,7 @@ def train():
             if args.model == 'Transformer':
                 output = model(data)
                 targets = targets
+                
             else:
                 output = model(data, hidden)
             loss = criterion(output, targets)
