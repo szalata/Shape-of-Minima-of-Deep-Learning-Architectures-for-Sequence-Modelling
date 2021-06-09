@@ -42,7 +42,7 @@ parser.add_argument('--save', type=str, default='trained_models/model.pt',
                     help='path to save the final model')
 parser.add_argument('--model_path', type=str, default=None,
                     help='path to load the model')
-parser.add_argument('--data_dir', type=str, default="data/sequence_classification",
+parser.add_argument('--data_dir', type=str, default="data/sequence_classification/varied_length",
                     help='directory with the dataset')
 parser.add_argument('--nhead', type=int, default=1,
                     help='the number of heads in the encoder/decoder of the transformer model')
@@ -69,14 +69,16 @@ dataset_train = SeqDataset(args.data_dir, "train")
 dataset_val = SeqDataset(args.data_dir, "val")
 dataloader_train = DataLoader(dataset_train,
                               shuffle=True,
+                              collate_fn = dataset_train.collate_fn,
                               batch_size=args.batch_size)
 dataloader_val = DataLoader(dataset_val,
                             shuffle=False,
+                            collate_fn = dataset_val.collate_fn,
                             batch_size=args.batch_size)
 
 if args.model == 'Transformer':
     model = model.TransformerModel(args.emsize, args.nhead, args.nhid, args.nlayers, args.task,
-                                   args.dropout, args.seq_len).to(device)
+                                   args.dropout).to(device)
 else:
     model = model.RNNModel(args.model, args.emsize, args.nout, args.nhid, args.nlayers, args.task,
                            args.dropout).to(device)
@@ -102,10 +104,10 @@ def evaluate(dataloader):
     if args.model != 'Transformer':
         hidden = model.init_hidden(args.batch_size)
     with torch.no_grad():
-        for data, targets in tqdm(dataloader, desc="Evaluating"):
+        for data, targets, masks in tqdm(dataloader, desc="Evaluating"):
             total_samples += targets.shape[0]
             if args.model == 'Transformer':
-                output = model(data)
+                output = model(data, masks)
                 targets = targets
             else:
                 output = model(data, hidden)
@@ -135,11 +137,13 @@ def train():
     for _ in train_iterator:
         epoch_iterator = tqdm(dataloader_train)
         for step, batch in enumerate(epoch_iterator):
-            data, targets = batch
+            data, targets, masks = batch
+            
             model.zero_grad()
             if args.model == 'Transformer':
-                output = model(data)
+                output = model(data, masks)
                 targets = targets
+                
                 
             else:
                 output = model(data, hidden)
