@@ -2,6 +2,7 @@ import math
 import torch
 import torch.nn as nn
 from torch.nn.init import xavier_uniform_
+import numpy as np
 
 
 class RNNModel(nn.Module):
@@ -87,7 +88,7 @@ class PositionalEncoding(nn.Module):
         Examples:
             >>> output = pos_encoder(x)
         """
-
+        
         x = x + self.pe[:x.size(0), :]
 
         return self.dropout(x)
@@ -96,7 +97,7 @@ class PositionalEncoding(nn.Module):
 class TransformerModel(nn.Module):
     """Container module with an encoder, a recurrent or transformer module, and a decoder."""
 
-    def __init__(self, ninp, nhead, nhid, nlayers, task, dropout=0.1, max_len=5):
+    def __init__(self, ninp, nhead, nhid, nlayers, task, dropout=0.1):
         super(TransformerModel, self).__init__()
         try:
             from torch.nn import TransformerEncoder, TransformerEncoderLayer
@@ -105,7 +106,7 @@ class TransformerModel(nn.Module):
         self.model_type = 'Transformer'
         self.src_mask = None
         self.embed = nn.Linear(ninp, nhid)
-        self.pos_encoder = PositionalEncoding(nhid, dropout, max_len)
+        self.pos_encoder = PositionalEncoding(nhid, dropout)
         encoder_layers = TransformerEncoderLayer(nhid, nhead, nhid * 2, dropout)
         encoder_norm = nn.LayerNorm(nhid)
         self.transformer_encoder = TransformerEncoder(encoder_layers, nlayers, encoder_norm)
@@ -115,17 +116,14 @@ class TransformerModel(nn.Module):
         self.sigmoid = nn.Sigmoid()
         self._reset_parameters()
 
-    def _generate_square_subsequent_mask(self, sz):
-        mask = (torch.triu(torch.ones(sz, sz)) == 1).transpose(0, 1)
-        mask = mask.float().masked_fill(mask == 0, float('-inf')).masked_fill(mask == 1, float(0.0))
-        return mask
 
-    def forward(self, src):
+    def forward(self, src, masks):
+        
         src = self.embed(src)
-        src = self.pos_encoder(torch.transpose(src, 0, 1))
-
-        output = self.transformer_encoder(src)
+        src = self.pos_encoder(torch.transpose(src, 0, 1)) 
+        output = self.transformer_encoder(src, src_key_padding_mask=masks)     
         output = self.decoder(output)
+        
         if self.task == "sequence_classification":
             return self.sigmoid(torch.mean(output, dim=0))
         elif self.task == "sequence_learning":
