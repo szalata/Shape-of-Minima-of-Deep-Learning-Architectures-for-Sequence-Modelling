@@ -29,18 +29,16 @@ class SeqDataset(Dataset):
         return seq, target, len(seq)
 
     def collate_fn(self, data):
-        
         seqs, targets, lengths = zip(*data)
         max_len = max(lengths)
-        batch_size= len(data)
-       
+        batch_size = len(data)
+
         targets = torch.tensor(targets)
         batch = torch.zeros((batch_size, max_len))
         masks = torch.zeros((batch_size, max_len))
 
-
         for i in range(batch_size):
-            padding = torch.zeros(max_len-lengths[i]) 
+            padding = torch.zeros(max_len - lengths[i])
             batch[i] = torch.cat((torch.from_numpy(seqs[i]), padding))
             masks[i][lengths[i]:] = 1
 

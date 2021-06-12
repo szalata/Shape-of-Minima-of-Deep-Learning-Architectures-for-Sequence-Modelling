@@ -100,8 +100,6 @@ def evaluate(dataloader):
     total_loss = 0.
     total_samples = 0
     total_correct = 0
-    if args.model != 'Transformer':
-        hidden = model.init_hidden(args.batch_size)
     with torch.no_grad():
         for data, targets, masks in tqdm(dataloader, desc="Evaluating"):
             total_samples += targets.shape[0]
@@ -109,7 +107,7 @@ def evaluate(dataloader):
                 output = model(data, masks)
                 targets = targets
             else:
-                output = model(data, hidden)
+                output = model(data, masks)
             if args.task == "sequence_classification":
                 total_correct += (((output >= 0.5) == targets.bool()).sum()).item()
             total_loss += criterion(output, targets).item()
@@ -127,8 +125,6 @@ def train():
     # Turn on training mode which enables dropout.
     model.train()
     total_loss = 0.
-    if args.model != 'Transformer':
-        hidden = model.init_hidden(args.batch_size)
     best_val_loss = None
 
     train_iterator = trange(int(args.epochs), desc="Epoch")
@@ -145,7 +141,7 @@ def train():
                 
                 
             else:
-                output = model(data, hidden)
+                output = model(data, masks)
             loss = criterion(output, targets)
             loss.backward()
             clip_grad_value_(model.parameters(), args.clip)

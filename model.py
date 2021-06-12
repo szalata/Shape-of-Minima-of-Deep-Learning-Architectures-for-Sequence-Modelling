@@ -2,7 +2,6 @@ import math
 import torch
 import torch.nn as nn
 from torch.nn.init import xavier_uniform_
-import numpy as np
 
 
 class RNNModel(nn.Module):
@@ -11,15 +10,14 @@ class RNNModel(nn.Module):
     def __init__(self, rnn_type, ninp, nout, nhid, nlayers, task, dropout=0.1):
         super(RNNModel, self).__init__()
         if rnn_type in ['LSTM', 'GRU']:
-            self.rnn = getattr(nn, rnn_type)(ninp, nhid, nlayers, dropout=dropout, batch_first=True)
+            self.rnn = getattr(nn, rnn_type)(ninp, nhid, nlayers, dropout=dropout)
         else:
             try:
                 nonlinearity = {'RNN_TANH': 'tanh', 'RNN_RELU': 'relu'}[rnn_type]
             except KeyError:
                 raise ValueError("""An invalid option for `--model` was supplied,
                                  options are ['LSTM', 'GRU', 'RNN_TANH' or 'RNN_RELU']""")
-            self.rnn = nn.RNN(ninp, nhid, nlayers, nonlinearity=nonlinearity, dropout=dropout,
-                              batch_first=True)
+            self.rnn = nn.RNN(ninp, nhid, nlayers, nonlinearity=nonlinearity, dropout=dropout)
         self.decoder = nn.Linear(nhid, nout)
 
         self.rnn_type = rnn_type
@@ -29,13 +27,18 @@ class RNNModel(nn.Module):
         self.sigmoid = torch.nn.Sigmoid()
         self.task = task
 
-    def forward(self, input, hidden):
-        emb = input
+    def forward(self, input, masks):
+        hidden = self.init_hidden(input.size(0))
+        lengths = masks.size(1) - masks.sum(dim=1)
+        input = torch.swapaxes(input, 0, 1)
+        emb = torch.nn.utils.rnn.pack_padded_sequence(input, lengths, enforce_sorted=False)
         output, hidden = self.rnn(emb, hidden)
+        padded_out, lens = torch.nn.utils.rnn.pad_packed_sequence(output)
+        padded_out = torch.swapaxes(padded_out, 0, 1)
         if self.task == "sequence_classification":
-            return self.sigmoid(self.decoder(output[:, -1]))
+            return self.sigmoid(self.decoder(padded_out[torch.arange(padded_out.size(0)), lens - 1]))
         elif self.task == "sequence_learning":
-            return self.decoder(output[:, -1])
+            return self.decoder(padded_out[torch.arange(padded_out.size(0)), lens - 1])
         else:
             print("unknown task!")
             exit()
@@ -88,7 +91,7 @@ class PositionalEncoding(nn.Module):
         Examples:
             >>> output = pos_encoder(x)
         """
-        
+
         x = x + self.pe[:x.size(0), :]
 
         return self.dropout(x)
@@ -116,14 +119,13 @@ class TransformerModel(nn.Module):
         self.sigmoid = nn.Sigmoid()
         self._reset_parameters()
 
-
     def forward(self, src, masks):
-        
+
         src = self.embed(src)
-        src = self.pos_encoder(torch.transpose(src, 0, 1)) 
-        output = self.transformer_encoder(src, src_key_padding_mask=masks)     
+        src = self.pos_encoder(torch.transpose(src, 0, 1))
+        output = self.transformer_encoder(src, src_key_padding_mask=masks)
         output = self.decoder(output)
-        
+
         if self.task == "sequence_classification":
             return self.sigmoid(torch.mean(output, dim=0))
         elif self.task == "sequence_learning":
