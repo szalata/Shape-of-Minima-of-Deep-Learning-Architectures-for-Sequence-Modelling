@@ -48,6 +48,9 @@ class RNNModel(nn.Module):
         else:
             return weight.new_zeros(self.nlayers, bsz, self.nhid)
 
+    def count_parameters(self):
+        r"""count the total number of parameters of the model"""
+        return sum(p.numel() for p in self.parameters() if p.requires_grad)
 
 class PositionalEncoding(nn.Module):
     r"""Inject some information about the relative or absolute position of the tokens
@@ -137,3 +140,7 @@ class TransformerModel(nn.Module):
         for p in self.parameters():
             if p.dim() > 1:
                 xavier_uniform_(p)
+    
+    def count_parameters(self):
+        r"""count the total number of parameters of the model"""
+        return sum(p.numel() for p in self.parameters() if p.requires_grad)
