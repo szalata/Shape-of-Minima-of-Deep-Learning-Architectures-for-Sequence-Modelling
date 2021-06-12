@@ -11,9 +11,6 @@ class SeqDataset(Dataset):
     """Sequence learning dataset."""
 
     def __init__(self, directory, split):
-        # self.seq = torch.from_numpy(np.load(os.path.join(directory, f"X_{split}.npy")))[:, :, None].float()
-        # self.targets = torch.from_numpy(np.load(os.path.join(directory, f"y_{split}.npy")))[:, None].float()
-
         Xfile = open(os.path.join(directory, f"X_{split}"), 'rb')
         self.seq = pickle.load(Xfile)
         Xfile.close()

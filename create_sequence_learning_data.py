@@ -13,7 +13,7 @@ if __name__ == '__main__':
     A every next number in a sequence is an increment of the previous one
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument('--seq_len', type=int, default=5, help='length of the sequence/sample')
+    parser.add_argument('--seq_len', type=int, default=10, help='length of the sequence/sample')
     parser.add_argument('--samples', type=int, default=5000, help='the number of samples to return')
     parser.add_argument('--increment', type=int, default=1000,
                         help='the difference between consecutive numbers')
@@ -22,21 +22,20 @@ if __name__ == '__main__':
     parser.add_argument('--test_fraction', type=float, default=0.1)
     parser.add_argument('--output_dir', type=str, help='name of the file to write', default="data/sequence_learning")
     parser.add_argument('--variable_length', action='store_true', help='if set, the sequences will have different length')
-    parser.add_argument('--max_len', type=int, default=10, help='maximum length for varaibel length sequences')
+    parser.add_argument('--max_len', type=int, default=10, help='maximum length for variable length sequences')
 
     args = parser.parse_args()
     np.random.seed(args.seed)
 
 
     if args.variable_length:
-
         out_array = [] 
         targets_array = [] 
         for i in range(args.samples):
             
             out_array.append(np.random.uniform(
                 -args.max_starting_point, high=args.max_starting_point, size=(1)))
-            for j in range(1, args.max_len-i%args.max_len):
+            for j in range(1, args.seq_len - i % args.seq_len):
                 out_array[i] = np.append(out_array[i],out_array[i][j-1]+ args.increment) 
             
             targets_array.append(out_array[i][-1] + args.increment)
