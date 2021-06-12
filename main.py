@@ -48,7 +48,6 @@ parser.add_argument('--nhead', type=int, default=1,
                     help='the number of heads in the encoder/decoder of the transformer model')
 parser.add_argument('--dry-run', action='store_true',
                     help='verify the code and the model')
-parser.add_argument('--seq_len', type=int, default=5, help='length of the sequence/sample')
 
 args = parser.parse_args()
 
