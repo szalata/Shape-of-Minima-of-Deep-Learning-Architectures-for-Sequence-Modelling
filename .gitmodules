@@ -1,0 +1,3 @@
+[submodule "loss-landscapes"]
+	path = loss-landscapes
+	url = git@github.com:szalata/loss-landscapes.git

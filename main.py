@@ -1,5 +1,8 @@
 # coding: utf-8
 import argparse
+import os
+from pathlib import Path
+
 import torch
 import numpy as np
 import torch.nn as nn
@@ -7,6 +10,15 @@ from torch.nn.utils import clip_grad_value_
 from torch.optim import AdamW
 from torch.utils.data import DataLoader
 from tqdm import tqdm, trange
+
+# imports for visualization
+import copy
+import matplotlib
+import matplotlib.pyplot as plt
+from mpl_toolkits import mplot3d
+matplotlib.rcParams['figure.figsize'] = [18, 12]
+import loss_landscapes
+import loss_landscapes.metrics
 
 import model
 from SeqDataset import SeqDataset
@@ -38,8 +50,8 @@ parser.add_argument('--cuda', action='store_true',
                     help='use CUDA')
 parser.add_argument('--log-interval', type=int, default=160, metavar='N',
                     help='report interval')
-parser.add_argument('--save', type=str, default='trained_models/model.pt',
-                    help='path to save the final model')
+parser.add_argument('--save', type=str, default='output',
+                    help='Output path')
 parser.add_argument('--model_path', type=str, default=None,
                     help='path to load the model')
 parser.add_argument('--data_dir', type=str, default="data/sequence_classification/varied_length",
@@ -50,6 +62,7 @@ parser.add_argument('--dry-run', action='store_true',
                     help='verify the code and the model')
 
 args = parser.parse_args()
+Path(args.save).mkdir(parents=True, exist_ok=True)
 
 args.task = args.data_dir.split("/")[1]
 
@@ -68,11 +81,11 @@ dataset_train = SeqDataset(args.data_dir, "train")
 dataset_val = SeqDataset(args.data_dir, "val")
 dataloader_train = DataLoader(dataset_train,
                               shuffle=True,
-                              collate_fn = dataset_train.collate_fn,
+                              collate_fn=dataset_train.collate_fn,
                               batch_size=args.batch_size)
 dataloader_val = DataLoader(dataset_val,
                             shuffle=False,
-                            collate_fn = dataset_val.collate_fn,
+                            collate_fn=dataset_val.collate_fn,
                             batch_size=args.batch_size)
 
 if args.model == 'Transformer':
@@ -81,6 +94,9 @@ if args.model == 'Transformer':
 else:
     model = model.RNNModel(args.model, args.emsize, args.nout, args.nhid, args.nlayers, args.task,
                            args.dropout).to(device)
+
+# for loss visualization
+model_initial = copy.deepcopy(model)
 
 if args.model_path is not None:
     model = torch.load(args.model_path)
@@ -121,6 +137,41 @@ def evaluate(dataloader):
     return loss_per_sample, total_accuracy
 
 
+def loss_landscape_viz(model_initial, model_final, criterion, loader, save_dir):
+    STEPS = 100
+    MAX_DIST = 100
+
+    CONTOUR_LEVELS = 50
+    x, y, mask = iter(loader).__next__()
+    metric = loss_landscapes.metrics.Loss(criterion, x, y, mask)
+
+    # interpolation
+    loss_data = loss_landscapes.linear_interpolation(model_initial, model_final, metric, STEPS,
+                                                     deepcopy_model=True)
+    plt.plot([1/STEPS * i for i in range(STEPS)], loss_data)
+    plt.xlabel('Interpolation Coefficient')
+    plt.title("Linear interpolation of loss")
+    plt.ylabel('Loss')
+    plt.savefig(os.path.join(save_dir, "loss_interpolation.jpg"))
+
+    # contour
+    plt.figure()
+    loss_data_fin = loss_landscapes.random_plane(model_final, metric, MAX_DIST, STEPS,
+                                                 normalization='filter', deepcopy_model=True)
+    plt.contour(loss_data_fin, levels=CONTOUR_LEVELS)
+    plt.title('Loss Contours around Trained Model')
+    plt.savefig(os.path.join(save_dir, "loss_contour_around_final.jpg"))
+
+    # 3d landscape
+    plt.figure()
+    ax = plt.axes(projection='3d')
+    X = np.array([[j for j in range(STEPS)] for i in range(STEPS)])
+    Y = np.array([[i for _ in range(STEPS)] for i in range(STEPS)])
+    ax.plot_surface(X, Y, loss_data_fin, rstride=1, cstride=1, cmap='viridis', edgecolor='none')
+    ax.set_title('Surface Plot of Loss Landscape')
+    plt.savefig(os.path.join(save_dir, "loss_3d_around_final.jpg"))
+
+
 def train():
     # Turn on training mode which enables dropout.
     model.train()
@@ -133,13 +184,12 @@ def train():
         epoch_iterator = tqdm(dataloader_train)
         for step, batch in enumerate(epoch_iterator):
             data, targets, masks = batch
-            
+
             model.zero_grad()
             if args.model == 'Transformer':
                 output = model(data, masks)
                 targets = targets
-                
-                
+
             else:
                 output = model(data, masks)
             loss = criterion(output, targets)
@@ -153,7 +203,7 @@ def train():
             if step % args.log_interval == 0 and step > 0:
                 val_loss, val_accuracy = evaluate(dataloader_val)
                 if not best_val_loss or val_loss < best_val_loss:
-                    with open(args.save, 'wb') as f:
+                    with open(os.path.join(args.save, "model.pt"), 'wb') as f:
                         torch.save(model, f)
                     best_val_loss = val_loss
                 if args.task == "sequence_learning":
@@ -163,8 +213,11 @@ def train():
                     epoch_iterator.set_description(f"Accuracy: {val_accuracy}")
             if args.dry_run:
                 break
+    return model
 
 
 best_val_loss = None
 
-train()
+final_model = train()
+loss_landscape_viz(model_initial, final_model, criterion, dataloader_train, args.save)
+
