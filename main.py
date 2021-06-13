@@ -98,6 +98,9 @@ else:
 # for loss visualization
 model_initial = copy.deepcopy(model)
 
+
+print(f"{model.count_parameters()} parameters")
+
 if args.model_path is not None:
     model = torch.load(args.model_path)
 
@@ -180,7 +183,7 @@ def train():
 
     train_iterator = trange(int(args.epochs), desc="Epoch")
     optimizer = AdamW(model.parameters(), lr=args.lr)
-    for _ in train_iterator:
+    for e,_ in enumerate(train_iterator):
         epoch_iterator = tqdm(dataloader_train)
         for step, batch in enumerate(epoch_iterator):
             data, targets, masks = batch
@@ -200,7 +203,7 @@ def train():
 
             total_loss += loss.item()
 
-            if step % args.log_interval == 0 and step > 0:
+            if (step % args.log_interval == 0 and step > 0) or (e==int(args.epochs)-1 and step==len(epoch_iterator)-1):
                 val_loss, val_accuracy = evaluate(dataloader_val)
                 if not best_val_loss or val_loss < best_val_loss:
                     with open(os.path.join(args.save, "model.pt"), 'wb') as f:
