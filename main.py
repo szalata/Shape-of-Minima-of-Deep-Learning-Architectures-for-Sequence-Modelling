@@ -24,7 +24,7 @@ parser.add_argument('--lr', type=float, default=0.001,
                     help='initial learning rate')
 parser.add_argument('--clip', type=float, default=0.25,
                     help='gradient clipping')
-parser.add_argument('--epochs', type=int, default=10,
+parser.add_argument('--epochs', type=int, default=5,
                     help='upper epoch limit')
 parser.add_argument('--batch_size', type=int, default=10, metavar='N',
                     help='batch size')
@@ -82,6 +82,9 @@ else:
     model = model.RNNModel(args.model, args.emsize, args.nout, args.nhid, args.nlayers, args.task,
                            args.dropout).to(device)
 
+
+print(f"{model.count_parameters()} parameters")
+
 if args.model_path is not None:
     model = torch.load(args.model_path)
 
@@ -129,7 +132,7 @@ def train():
 
     train_iterator = trange(int(args.epochs), desc="Epoch")
     optimizer = AdamW(model.parameters(), lr=args.lr)
-    for _ in train_iterator:
+    for e,_ in enumerate(train_iterator):
         epoch_iterator = tqdm(dataloader_train)
         for step, batch in enumerate(epoch_iterator):
             data, targets, masks = batch
@@ -150,7 +153,7 @@ def train():
 
             total_loss += loss.item()
 
-            if step % args.log_interval == 0 and step > 0:
+            if (step % args.log_interval == 0 and step > 0) or (e==int(args.epochs)-1 and step==len(epoch_iterator)-1):
                 val_loss, val_accuracy = evaluate(dataloader_val)
                 if not best_val_loss or val_loss < best_val_loss:
                     with open(args.save, 'wb') as f:
