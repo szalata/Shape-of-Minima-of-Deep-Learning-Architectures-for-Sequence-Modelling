@@ -127,12 +127,12 @@ class TransformerModel(nn.Module):
         src = self.embed(src)
         src = self.pos_encoder(torch.transpose(src, 0, 1))
         output = self.transformer_encoder(src, src_key_padding_mask=masks)
-        output = self.decoder(output)
+        output = self.decoder(output[0])
 
         if self.task == "sequence_classification":
-            return self.sigmoid(torch.mean(output, dim=0))
+            return self.sigmoid(output)
         elif self.task == "sequence_learning":
-            return output[0]
+            return output
         else:
             print("unknown task!")
             exit()
