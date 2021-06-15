@@ -23,7 +23,6 @@ if __name__ == '__main__':
     parser.add_argument('--output_dir', type=str, help='name of the file to write', default="data/sequence_learning")
     parser.add_argument('--variable_length', action='store_true', help='if set, the sequences will have different length')
     parser.add_argument('--variable_increment', action='store_true', help='if set, the increment will be different for each sequence')
-    parser.add_argument('--max_len', type=int, default=10, help='maximum length for variable length sequences')
 
     args = parser.parse_args()
     np.random.seed(args.seed)

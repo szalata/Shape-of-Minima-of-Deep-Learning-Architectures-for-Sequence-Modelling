@@ -14,7 +14,7 @@ if __name__ == '__main__':
     Predict whether the sum of the sequence exceeds the threshold
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument('--seq_len', type=int, default=5, help='length of the sequence/sample')
+    parser.add_argument('--seq_len', type=int, default=5, help='(maximal) length of the sequence/sample')
     parser.add_argument('--samples', type=int, default=5000, help='the number of samples to return')
     parser.add_argument('--threshold', type=int, default=0)
     parser.add_argument('--max_number', type=int, default=1000)
@@ -24,8 +24,6 @@ if __name__ == '__main__':
                         default="data/sequence_classification")
     parser.add_argument('--variable_length', action='store_true',
                         help='if set, the sequences will have different length')
-    parser.add_argument('--max_len', type=int, default=10,
-                        help='maximum length for varaibel length sequences')
 
     args = parser.parse_args()
     np.random.seed(args.seed)
@@ -35,7 +33,7 @@ if __name__ == '__main__':
         targets_array = []
         for i in range(args.samples):
             seq = np.random.uniform(
-                -args.max_number, high=args.max_number, size=(args.max_len - i % args.max_len))
+                -args.max_number, high=args.max_number, size=(args.seq_len - i % args.seq_len))
             target = seq.sum(axis=0) >= args.threshold
 
             out_array.append(seq)
