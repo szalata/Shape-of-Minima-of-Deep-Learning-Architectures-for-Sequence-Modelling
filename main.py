@@ -64,6 +64,9 @@ parser.add_argument('--nhead', type=int, default=1,
                     help='the number of heads in the encoder/decoder of the transformer model')
 parser.add_argument('--dry-run', action='store_true',
                     help='verify the code and the model')
+parser.add_argument('--all_metrics_on_training_set', action='store_true',
+                    help='Whether to produce all metrics not only on the test set, but also on'
+                         'training set.')
 
 args = parser.parse_args()
 Path(args.save).mkdir(parents=True, exist_ok=True)
@@ -206,7 +209,8 @@ def loss_landscape_viz(model_initial, model_final, criterion, loader_train, load
         ax.set_title('Surface Plot of Loss Landscape')
         plt.savefig(os.path.join(save_dir, f"loss_3d_around_final_{split}.pdf"))
 
-    draw_contour_plots(metric, "train")
+    if args.all_metrics_on_training_set:
+        draw_contour_plots(metric, "train")
     draw_contour_plots(metric_test, "test")
 
 
@@ -262,4 +266,6 @@ loss_landscape_viz(model_initial, final_model, criterion, dataloader_train, data
                    args.save)
 
 hessian_computation(final_model, criterion, dataloader_test, args.save, "test")
-hessian_computation(final_model, criterion, dataloader_train, args.save, "train")
+
+if args.all_metrics_on_training_set:
+    hessian_computation(final_model, criterion, dataloader_train, args.save, "train")
