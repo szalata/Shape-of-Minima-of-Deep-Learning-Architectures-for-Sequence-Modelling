@@ -29,7 +29,7 @@ parser.add_argument('--model', type=str, default='Transformer',
 parser.add_argument('--emsize', type=int, default=1,
                     help='size of input embeddings')
 parser.add_argument('--nhid', type=int, default=8,
-                    help='number of hidden units per layer')
+                    help='Hidden embedding size')
 parser.add_argument('--nlayers', type=int, default=1,
                     help='number of layers')
 parser.add_argument('--lr', type=float, default=0.001,
