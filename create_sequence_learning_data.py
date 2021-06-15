@@ -77,12 +77,27 @@ if __name__ == '__main__':
         X, y = split_data_mapping[split]
 
         if args.variable_length:
-            Xpath = os.path.join(args.output_dir+"/varied_length", f"X_{split}")
-            ypath = os.path.join(args.output_dir+"/varied_length", f"y_{split}")
+            p = args.output_dir+"/varied_length"
+            if args.variable_increment:
+                p += "/variable_increment/"
+            else:
+                p += "/fixed_increment"
+            Path(p).mkdir(parents=True, exist_ok=True)
+            Xpath = os.path.join(p, f"X_{split}")
+            ypath = os.path.join(p, f"y_{split}")
             
         else:
-            Xpath = os.path.join(args.output_dir+"/fixed_length", f"X_{split}")
-            ypath = os.path.join(args.output_dir+"/fixed_length", f"y_{split}")
+            p = args.output_dir+"/fixed_length"
+            if args.variable_increment:
+                p += "/variable_increment/"
+            else:
+                p += "/fixed_increment"
+            Path(p).mkdir(parents=True, exist_ok=True)
+            Xpath = os.path.join(p, f"X_{split}")
+            ypath = os.path.join(p, f"y_{split}")
+
+        
+       
 
         # if file already exists remove it
         if os.path.isfile(Xpath):
