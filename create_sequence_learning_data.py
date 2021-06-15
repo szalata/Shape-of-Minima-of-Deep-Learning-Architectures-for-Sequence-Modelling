@@ -22,6 +22,7 @@ if __name__ == '__main__':
     parser.add_argument('--test_fraction', type=float, default=0.1)
     parser.add_argument('--output_dir', type=str, help='name of the file to write', default="data/sequence_learning")
     parser.add_argument('--variable_length', action='store_true', help='if set, the sequences will have different length')
+    parser.add_argument('--variable_increment', action='store_true', help='if set, the increment will be different for each sequence')
     parser.add_argument('--max_len', type=int, default=10, help='maximum length for variable length sequences')
 
     args = parser.parse_args()
@@ -32,20 +33,28 @@ if __name__ == '__main__':
         out_array = [] 
         targets_array = [] 
         for i in range(args.samples):
+            if args.variable_increment:
+                increment = np.random.uniform(-args.max_starting_point, high=args.max_starting_point, size=(1))
+            else:
+                increment = args.increment
             
             out_array.append(np.random.uniform(
                 -args.max_starting_point, high=args.max_starting_point, size=(1)))
             for j in range(1, args.seq_len - i % args.seq_len):
-                out_array[i] = np.append(out_array[i],out_array[i][j-1]+ args.increment) 
+                out_array[i] = np.append(out_array[i], out_array[i][j-1] + increment)
             
             targets_array.append(out_array[i][-1] + args.increment)
     else:
         out_array = np.zeros((args.samples, args.seq_len))
+        if args.variable_increment:
+            increment = np.random.uniform(-args.max_starting_point, high=args.max_starting_point, size=(args.samples))
+        else:
+            increment = args.increment
         out_array[:, 0] = np.random.uniform(
             -args.max_starting_point, high=args.max_starting_point, size=args.samples)
         for i in range(1, args.seq_len):
-            out_array[:, i] = out_array[:, i - 1] + args.increment
-        targets_array = out_array[:, -1] + args.increment
+            out_array[:, i] = out_array[:, i - 1] + increment
+        targets_array = out_array[:, -1] + increment
         
 
     # create data splits
