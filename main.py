@@ -11,11 +11,14 @@ from torch.optim import AdamW
 from torch.utils.data import DataLoader
 from tqdm import tqdm, trange
 
+# imports for hessian
+from pyhessian import hessian
+from PyHessian.density_plot import get_esd_plot
+
 # imports for visualization
 import copy
 import matplotlib
 import matplotlib.pyplot as plt
-from mpl_toolkits import mplot3d
 
 matplotlib.rcParams['figure.figsize'] = [18, 12]
 import loss_landscapes
@@ -145,6 +148,20 @@ def evaluate(dataloader):
     return loss_per_sample, total_accuracy
 
 
+def hessian_computation(model_final, criterion, loader, save_dir, split):
+    hessian_comp = hessian(model_final,
+                           criterion,
+                           dataloader=loader,
+                           cuda=False)
+
+    top_eigenvalues, _ = hessian_comp.eigenvalues()
+    trace = np.mean(hessian_comp.trace())
+    np.save(os.path.join(save_dir, f"hessian_{split}.npy"), np.array([top_eigenvalues[0], trace]))
+
+    density_eigen, density_weight = hessian_comp.density()
+    get_esd_plot(density_eigen, density_weight, save_dir, split)
+
+
 def loss_landscape_viz(model_initial, model_final, criterion, loader_train, loader_test, save_dir):
     STEPS = 100
     MAX_DIST = 100
@@ -243,3 +260,6 @@ best_val_loss = None
 final_model = train()
 loss_landscape_viz(model_initial, final_model, criterion, dataloader_train, dataloader_test,
                    args.save)
+
+hessian_computation(final_model, criterion, dataloader_test, args.save, "test")
+hessian_computation(final_model, criterion, dataloader_train, args.save, "train")
