@@ -1,3 +1,9 @@
 [submodule "loss-landscapes"]
 	path = loss-landscapes
 	url = git@github.com:szalata/loss-landscapes.git
+[submodule "pyhessian"]
+	path = pyhessian
+	url = git@github.com:szalata/PyHessian.git
+[submodule "PyHessian"]
+	path = PyHessian
+	url = git@github.com:szalata/PyHessian.git
