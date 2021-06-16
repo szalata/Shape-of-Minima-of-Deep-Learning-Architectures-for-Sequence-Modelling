@@ -9,9 +9,9 @@ nhead=${5:-1}
 nhid=${6:-8}
 
 run_experiment() {
-    for ((e=$1;e<=$1*10;e+=10));
+    for ((e=$1;e<=$1*20;e+=50));
     do
-        for ((hid=$2;hid<=$2*4;hid+=2));
+        for ((hid=$2;hid<=$2*4;hid*=2));
         do  
                     
             echo "model: $3, nlayer: $nlayer, nhid: $hid, nhead: $nhead, epochs: $e"
@@ -27,7 +27,7 @@ run_experiment() {
 for model in "${models[@]}"
 do
 
-    for ((len=max_len;len<=max_len*10;len+=100));
+    for ((len=max_len;len<=max_len*25;len*=5));
     do
         echo "sequence classification with fixed length $len"
 
@@ -47,7 +47,7 @@ do
         run_experiment$epochs $nhid $model $data_dir $output_dir
     done
 
-    for ((len=max_len;len<=max_len*10;len+=100));
+    for ((len=max_len;len<=max_len*25;len*=5));
     do
         echo "#########################################################"
         echo "sequence learning with fixed length $len and fixed increment"
