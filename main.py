@@ -25,7 +25,7 @@ import loss_landscapes
 import loss_landscapes.metrics
 
 import model
-from SeqDataset import SeqDataset
+from seq_dataset import SeqDataset
 
 parser = argparse.ArgumentParser(description='PyTorch Transformer')
 parser.add_argument('--model', type=str, default='Transformer',
