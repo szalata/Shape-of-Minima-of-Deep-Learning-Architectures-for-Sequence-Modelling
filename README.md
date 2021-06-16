@@ -9,6 +9,7 @@ We have added two submodules to the repository that encompass two modified pytho
 Cloning the repository:
 ```
 git clone https://github.com/szalata/optim_proj.git
+cd optim_proj
 git submodule init
 git submodule update
 ```
