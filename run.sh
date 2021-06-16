@@ -4,8 +4,8 @@ model=${1:-Transformer}
 max_len=${2:-100}
 epochs=${3:-10}
 nlayer=${4:-2}
-nhead=${5:-2}
-nhid=${6:-2}
+nhead=${5:-1}
+nhid=${6:-8}
 
 run_experiment() {
     for ((e=$1;e<=$1*10;e+=10));
