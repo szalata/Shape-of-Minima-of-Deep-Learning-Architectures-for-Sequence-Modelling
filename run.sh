@@ -15,7 +15,7 @@ run_experiment() {
         do  
             for ((nl=nlayer;nl<=nlayer+10;nl+=5));
             do
-                for ((nh=nhead;nh<=nhead+4;nh+=2));
+                for ((nh=nhead;nh<=nhead*4;nh*=2));
                 do
                     echo "model: $3, nlayer: $nl, nhid: $hid, nhead: $nh, epochs: $e"
                     save_dir="$5/$model-model_$len-length_$e-epochs_$nl-layer_$nh-head_$hid-hiddendim"
