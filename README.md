@@ -23,6 +23,15 @@ Activate the conda environment:
 conda activate optim_proj
 ```
 
+Install submodules:
+
+```
+cd PyHessian; python setup.py install
+cd ..
+cd loss-landscapes; python setup.py install
+cd ..
+```
+
 Execute all the experiments:
 ```
 ./run.sh
