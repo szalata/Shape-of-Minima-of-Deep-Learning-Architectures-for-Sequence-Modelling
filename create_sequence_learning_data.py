@@ -10,7 +10,7 @@ from sklearn.model_selection import train_test_split
 
 if __name__ == '__main__':
     """
-    A every next number in a sequence is an increment of the previous one
+    Task: Every next number in a sequence is an increment of the previous one. Predict the number succeeding a sequence.
     """
     parser = argparse.ArgumentParser()
     parser.add_argument('--seq_len', type=int, default=10, help='length of the sequence/sample')

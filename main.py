@@ -125,6 +125,12 @@ if args.task == "sequence_classification":
 # Training code
 ###############################################################################
 def evaluate(dataloader):
+    """
+    Perform model evaluation, normally on the validation set during training.
+    Returns loss per sample that in case of sequence learning is actually the square root of the
+    loss per sample - for readability since mean squared error is used to compute the loss.
+    Additionally accuracy is returned for sequence classification.
+    """
     # Turn on evaluation mode which disables dropout.
     model.eval()
     total_loss = 0.
@@ -152,6 +158,9 @@ def evaluate(dataloader):
 
 
 def hessian_computation(model_final, criterion, loader, save_dir, split):
+    """
+    Compute and save top hessian eigenvalue, hessian trace and the ESD plot.
+    """
     hessian_comp = hessian(model_final,
                            criterion,
                            dataloader=loader,
@@ -166,6 +175,12 @@ def hessian_computation(model_final, criterion, loader, save_dir, split):
 
 
 def loss_landscape_viz(model_initial, model_final, criterion, loader_train, loader_test, save_dir):
+    """
+    Save three loss landscape plots. One is the interpolation between the initial set of weights
+    and the final set of weights, another one is contour plot and the third one is a 3d plot
+    visualizing the same thing as the contour plot. See report for the explanation of the
+    visualization methods.
+    """
     STEPS = 100
     MAX_DIST = 100
     CONTOUR_LEVELS = 50
@@ -212,6 +227,7 @@ def loss_landscape_viz(model_initial, model_final, criterion, loader_train, load
     if args.all_metrics_on_training_set:
         draw_contour_plots(metric, "train")
     draw_contour_plots(metric_test, "test")
+    return loss_data_test
 
 
 def train():
@@ -262,8 +278,10 @@ def train():
 best_val_loss = None
 
 final_model = train()
-loss_landscape_viz(model_initial, final_model, criterion, dataloader_train, dataloader_test,
-                   args.save)
+loss_test = loss_landscape_viz(model_initial, final_model, criterion, dataloader_train,
+                               dataloader_test, args.save)
+# save the loss of the trained model on the test set
+np.save(os.path.join(args.save, "test_loss.npy"), loss_test[-1])
 
 hessian_computation(final_model, criterion, dataloader_test, args.save, "test")
 

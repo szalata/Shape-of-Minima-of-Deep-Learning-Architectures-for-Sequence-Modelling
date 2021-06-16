@@ -11,7 +11,7 @@ from sklearn.model_selection import train_test_split
 
 if __name__ == '__main__':
     """
-    Predict whether the sum of the sequence exceeds the threshold
+    Task: Predict whether the sum of the sequence exceeds the threshold
     """
     parser = argparse.ArgumentParser()
     parser.add_argument('--seq_len', type=int, default=5, help='(maximal) length of the sequence/sample')

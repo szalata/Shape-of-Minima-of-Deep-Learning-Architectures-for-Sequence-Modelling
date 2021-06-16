@@ -6,7 +6,6 @@ from torch.nn.init import xavier_uniform_
 
 class RNNModel(nn.Module):
     """Container module with an encoder, a recurrent module, and a decoder."""
-
     def __init__(self, rnn_type, ninp, nout, nhid, nlayers, task, dropout=0.1):
         super(RNNModel, self).__init__()
         if rnn_type in ['LSTM', 'GRU']:
@@ -28,6 +27,9 @@ class RNNModel(nn.Module):
         self.task = task
 
     def forward(self, input, masks):
+        """
+        Takes both input and masks as parameters. Masks refer to padding masks, not input masks (reversed input mask)
+        """
         hidden = self.init_hidden(input.size(0))
         lengths = masks.size(1) - masks.sum(dim=1)
         input = torch.swapaxes(input, 0, 1)
@@ -44,6 +46,9 @@ class RNNModel(nn.Module):
             exit()
 
     def init_hidden(self, bsz):
+        """
+        Initialize hidden states
+        """
         weight = next(self.parameters())
         if self.rnn_type == 'LSTM':
             return (weight.new_zeros(self.nlayers, bsz, self.nhid),
@@ -101,8 +106,7 @@ class PositionalEncoding(nn.Module):
 
 
 class TransformerModel(nn.Module):
-    """Container module with an encoder, a recurrent or transformer module, and a decoder."""
-
+    """Container module with an encoder, a transformer module, and a decoder."""
     def __init__(self, ninp, nhead, nhid, nlayers, task, dropout=0.1):
         super(TransformerModel, self).__init__()
         try:
@@ -123,7 +127,9 @@ class TransformerModel(nn.Module):
         self._reset_parameters()
 
     def forward(self, src, masks):
-
+        """
+        Takes both input and masks as parameters. Masks refer to padding masks, not input masks (reversed input mask)
+        """
         src = self.embed(src)
         src = self.pos_encoder(torch.transpose(src, 0, 1))
         output = self.transformer_encoder(src, src_key_padding_mask=masks)

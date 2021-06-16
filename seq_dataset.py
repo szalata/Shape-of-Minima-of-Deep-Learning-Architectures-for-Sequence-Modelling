@@ -9,7 +9,6 @@ import pickle
 
 class SeqDataset(Dataset):
     """Sequence learning dataset."""
-
     def __init__(self, directory, split):
         Xfile = open(os.path.join(directory, f"X_{split}"), 'rb')
         self.seq = pickle.load(Xfile)
