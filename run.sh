@@ -4,7 +4,7 @@ models=('Transformer' 'GRU' 'LSTM')
 
 max_len=${2:-5}
 epochs=${3:-10}
-nlayer=${4:-2}
+nlayer=${4:-1}
 nhead=${5:-1}
 nhid=${6:-8}
 
