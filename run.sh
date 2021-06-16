@@ -13,11 +13,15 @@ run_experiment() {
     do
         for ((hid=$2;hid<=$2*4;hid*=2));
         do  
-                    
-            echo "model: $3, nlayer: $nlayer, nhid: $hid, nhead: $nhead, epochs: $e"
-            save_dir="$5/$model-model_$len-length_$e-epochs_$nlayer-layer_$nhead-head_$hid-hiddendim"
-            python main.py --model $3 --nlayers $nlayer --nhid $hid --nhead $nhead --epochs $e --data_dir $4 --save $save_dir
-            
+            for ((nl=nlayer;nl<=nlayer+10;nl+=5));
+            do
+                for ((nh=nhead;nh<=nhead+4;nh+=2));
+                do
+                    echo "model: $3, nlayer: $nl, nhid: $hid, nhead: $nh, epochs: $e"
+                    save_dir="$5/$model-model_$len-length_$e-epochs_$nl-layer_$nh-head_$hid-hiddendim"
+                    python main.py --model $3 --nlayers $nl --nhid $hid --nhead $nh --epochs $e --data_dir $4 --save $save_dir
+                done
+            done
         done
             
     done
