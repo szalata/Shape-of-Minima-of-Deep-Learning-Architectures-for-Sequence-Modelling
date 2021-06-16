@@ -28,4 +28,4 @@ Execute all the experiments:
 ./run.sh
 ```
 
-
+The output will be saved in the directory `output` with subdirectories for each set of parameters.
