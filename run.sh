@@ -64,6 +64,10 @@ nhid=14
 model='LSTM'
 run_single_experiment $epochs $nhid $layer $head $model $output_dir $len $data_dir
 
+nhid=16
+model='GRU'
+run_single_experiment $epochs $nhid $layer $head $model $output_dir $len $data_dir
+
 
 
 # Stuff below is just temporarily here !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
