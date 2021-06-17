@@ -27,9 +27,10 @@ import loss_landscapes.metrics
 import model
 from seq_dataset import SeqDataset
 
-parser = argparse.ArgumentParser(description='PyTorch Transformer')
+parser = argparse.ArgumentParser(description='Shape of Minima of Deep Learning Architectures for '
+                                             'Sequence Modelling')
 parser.add_argument('--model', type=str, default='Transformer',
-                    help='type of recurrent net (RNN_TANH, RNN_RELU, LSTM, GRU, Transformer)')
+                    help='type of recurrent net (STM, GRU, Transformer)')
 parser.add_argument('--emsize', type=int, default=1,
                     help='size of input embeddings')
 parser.add_argument('--nhid', type=int, default=8,
