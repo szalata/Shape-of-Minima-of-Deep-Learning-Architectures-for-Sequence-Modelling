@@ -40,76 +40,116 @@ do
     python create_sequence_classification_data.py --seq_len $len
     run_experiment $epochs $nhid $model $data_dir $output_dir
 
-    head=1
-
-    len=5
-    echo "#########################################################"
-    echo "sequence classification with variable length maximum $len"
-
-    data_dir="data/sequence_classification/variable_length"
-    output_dir="output/seq_cls/variable_length"
-
-    python create_sequence_classification_data.py --seq_len $len --variable_length
-
-    layer=2
-    nhid=8
-    epochs=10
-    run_single_experiment $epochs $nhid $layer $head $model $output_dir $len $data_dir
-
-    len=5
-    echo "#########################################################"
-    echo "sequence learning with fixed length $len and fixed increment"
-
-    data_dir="data/sequence_learning/fixed_length/fixed_increment"
-    output_dir="output/seq_lrn/fixed_length/fixed_inc"
-
-    python create_sequence_learning_data.py --seq_len $len
-
-    layer=2
-    nhid=8
-    epochs=10
-    run_single_experiment $epochs $nhid $layer $head $model $output_dir $len $data_dir
-
-    len=5
-    echo "#########################################################"
-    echo "sequence learning with fixed length $len  and variable increment"
-
-    data_dir="data/sequence_learning/fixed_length/variable_increment"
-    output_dir="output/seq_lrn/fixed_length/var_inc"
-
-    python create_sequence_learning_data.py --seq_len $len --variable_increment
-
-    layer=2
-    nhid=8
-    epochs=10
-    run_single_experiment $epochs $nhid $layer $head $model $output_dir $len $data_dir
-
-
-    len=5
-    echo "#########################################################"
-    echo "sequence learning with variable length maximum $len and fixed increment"
-
-    data_dir="data/sequence_learning/variable_length/fixed_increment"
-    output_dir="output/seq_lrn/variable_length/fixed_inc"
-
-    python create_sequence_learning_data.py --seq_len $len --variable_length
-
-    layer=2
-    nhid=8
-    epochs=10
-    run_single_experiment $epochs $nhid $layer $head $model $output_dir $len $data_dir
-
-    len=5
-    echo "#########################################################"
-    echo "sequence learning with variable length maximum $len and variable increment"
-
-    data_dir="data/sequence_learning/variable_length/variable_increment"
-    output_dir="output/seq_lrn/variable_length/var_inc"
-
-    python create_sequence_learning_data.py --seq_len $len --variable_increment --variable_length
-
-    layer=2
-    nhid=8
-    epochs=10
-    run_single_experiment $epochs $nhid $layer $head $model $output_dir $len $data_dir
 done
+
+head=1
+
+len=5
+echo "#########################################################"
+echo "sequence learning with fixed length $len and fixed increment"
+
+data_dir="data/sequence_learning/fixed_length/fixed_increment"
+output_dir="output/seq_lrn/fixed_length/fixed_inc"
+
+python create_sequence_learning_data.py --seq_len $len
+
+epochs=50
+layer=2
+
+nhid=12
+model='Transformer'
+run_single_experiment $epochs $nhid $layer $head $model $output_dir $len $data_dir
+
+nhid=14
+model='LSTM'
+run_single_experiment $epochs $nhid $layer $head $model $output_dir $len $data_dir
+
+
+
+# Stuff below is just temporarily here !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#len=5
+#echo "#########################################################"
+#echo "sequence learning with fixed length $len  and variable increment"
+#
+#data_dir="data/sequence_learning/fixed_length/variable_increment"
+#output_dir="output/seq_lrn/fixed_length/var_inc"
+#
+#python create_sequence_learning_data.py --seq_len $len --variable_increment
+#
+#model="Transformer"
+#layer=2
+#nhid=8
+#epochs=10
+#run_single_experiment $epochs $nhid $layer $head $model $output_dir $len $data_dir
+#
+#    len=5
+#    echo "#########################################################"
+#    echo "sequence classification with variable length maximum $len"
+#
+#    data_dir="data/sequence_classification/variable_length"
+#    output_dir="output/seq_cls/variable_length"
+#
+#    python create_sequence_classification_data.py --seq_len $len --variable_length
+#
+#    layer=2
+#    nhid=8
+#    epochs=10
+#    run_single_experiment $epochs $nhid $layer $head $model $output_dir $len $data_dir
+#    len=5
+#    echo "#########################################################"
+#    echo "sequence learning with fixed length $len and fixed increment"
+#
+#    data_dir="data/sequence_learning/fixed_length/fixed_increment"
+#    output_dir="output/seq_lrn/fixed_length/fixed_inc"
+#
+#    python create_sequence_learning_data.py --seq_len $len
+#
+#    layer=2
+#    nhid=12
+#    epochs=50
+#    run_single_experiment $epochs $nhid $layer $head $model $output_dir $len $data_dir
+
+#    len=5
+#    echo "#########################################################"
+#    echo "sequence learning with fixed length $len  and variable increment"
+#
+#    data_dir="data/sequence_learning/fixed_length/variable_increment"
+#    output_dir="output/seq_lrn/fixed_length/var_inc"
+#
+#    python create_sequence_learning_data.py --seq_len $len --variable_increment
+#
+#    layer=2
+#    nhid=8
+#    epochs=10
+#    run_single_experiment $epochs $nhid $layer $head $model $output_dir $len $data_dir
+#
+#
+#    len=5
+#    echo "#########################################################"
+#    echo "sequence learning with variable length maximum $len and fixed increment"
+#
+#    data_dir="data/sequence_learning/variable_length/fixed_increment"
+#    output_dir="output/seq_lrn/variable_length/fixed_inc"
+#
+#    python create_sequence_learning_data.py --seq_len $len --variable_length
+#
+#    layer=2
+#    nhid=8
+#    epochs=10
+#    run_single_experiment $epochs $nhid $layer $head $model $output_dir $len $data_dir
+#
+#    len=5
+#    echo "#########################################################"
+#    echo "sequence learning with variable length maximum $len and variable increment"
+#
+#    data_dir="data/sequence_learning/variable_length/variable_increment"
+#    output_dir="output/seq_lrn/variable_length/var_inc"
+#
+#    python create_sequence_learning_data.py --seq_len $len --variable_increment --variable_length
+#
+#    layer=2
+#    nhid=8
+#    epochs=10
+#    run_single_experiment $epochs $nhid $layer $head $model $output_dir $len $data_dir
+#done
