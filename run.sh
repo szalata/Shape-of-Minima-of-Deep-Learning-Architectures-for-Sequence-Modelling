@@ -29,7 +29,6 @@ run_single_experiment() {
     python main.py --model $5 --nlayers $3 --nhid $2 --nhead $4 --epochs $1 --data_dir $8 --save $save_dir
 }
 
-
 for model in "${models[@]}"
 do
     len=5
@@ -41,6 +40,8 @@ do
     python create_sequence_classification_data.py --seq_len $len
     run_experiment $epochs $nhid $model $data_dir $output_dir
 
+    head=1
+
     len=5
     echo "#########################################################"
     echo "sequence classification with variable length maximum $len"
@@ -51,7 +52,6 @@ do
     python create_sequence_classification_data.py --seq_len $len --variable_length
 
     layer=2
-    head=1
     nhid=8
     epochs=10
     run_single_experiment $epochs $nhid $layer $head $model $output_dir $len $data_dir
@@ -66,7 +66,6 @@ do
     python create_sequence_learning_data.py --seq_len $len
 
     layer=2
-    head=1
     nhid=8
     epochs=10
     run_single_experiment $epochs $nhid $layer $head $model $output_dir $len $data_dir
@@ -81,7 +80,6 @@ do
     python create_sequence_learning_data.py --seq_len $len --variable_increment
 
     layer=2
-    head=1
     nhid=8
     epochs=10
     run_single_experiment $epochs $nhid $layer $head $model $output_dir $len $data_dir
@@ -97,7 +95,6 @@ do
     python create_sequence_learning_data.py --seq_len $len --variable_length
 
     layer=2
-    head=1
     nhid=8
     epochs=10
     run_single_experiment $epochs $nhid $layer $head $model $output_dir $len $data_dir
@@ -112,7 +109,6 @@ do
     python create_sequence_learning_data.py --seq_len $len --variable_increment --variable_length
 
     layer=2
-    head=1
     nhid=8
     epochs=10
     run_single_experiment $epochs $nhid $layer $head $model $output_dir $len $data_dir
