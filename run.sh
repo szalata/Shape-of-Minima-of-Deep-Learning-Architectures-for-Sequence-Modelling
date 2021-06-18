@@ -42,6 +42,8 @@ do
 
 done
 
+python create_plotly_plots.py
+
 head=1
 
 len=5
@@ -67,7 +69,6 @@ run_single_experiment $epochs $nhid $layer $head $model $output_dir $len $data_d
 nhid=16
 model='GRU'
 run_single_experiment $epochs $nhid $layer $head $model $output_dir $len $data_dir
-
 
 
 # Stuff below is just temporarily here !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

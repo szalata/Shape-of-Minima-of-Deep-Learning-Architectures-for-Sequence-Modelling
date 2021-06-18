@@ -33,9 +33,10 @@ cd loss-landscapes; python setup.py install
 cd ..
 ```
 
-Execute all the experiments:
+Execute all the experiments and generate plots:
 ```
 ./run.sh
 ```
 
 The output will be saved in the directory `output` with subdirectories for each set of parameters.
+
