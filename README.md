@@ -8,8 +8,8 @@ We have added two submodules to the repository that encompass two modified pytho
 # Reproducing results
 Cloning the repository:
 ```
-git clone https://github.com/szalata/optim_proj.git
-cd optim_proj
+git clone https://github.com/szalata/Shape-of-Minima-of-Deep-Learning-Architectures-for-Sequence-Modelling.git
+cd Shape-of-Minima-of-Deep-Learning-Architectures-for-Sequence-Modelling
 git submodule init
 git submodule update
 ```
